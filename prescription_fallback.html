@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prescription | Brain Tumor Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <a class="home-icon" href="{{ url_for('home') }}" aria-label="Home">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 11.5 12 4l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11.5Z" stroke="rgba(255,255,255,0.92)" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </a>
+
+        <a class="brand-inline" href="{{ url_for('home') }}">
+          <div class="dot"></div>
+          <div>
+            <div class="brand-title-sm">Brain Tumor AI</div>
+            <div class="brand-subtitle-sm">Detection & Segmentation</div>
+          </div>
+        </a>
+
+        <div class="nav">
+          <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+          <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a class="nav-link" href="{{ url_for('history') }}">History</a>
+          <a class="nav-link" href="{{ url_for('food') }}">Food Recommendations</a>
+          <a class="nav-link" href="{{ url_for('articles') }}">Articles</a>
+          {% if session.get('role') == 'admin' %}
+            <a class="nav-link" href="{{ url_for('admin') }}">Admin</a>
+          {% endif %}
+          <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container page">
+      <div class="card glass page-card">
+        <div class="center">
+          <h1 class="hero-title">Prescription (Fallback View)</h1>
+          <p class="muted hero-subtitle">
+            PDF generation failed on your system. The prescription is displayed below.
+          </p>
+        </div>
+
+        <div class="info-card" style="margin-top: 14px;">
+          <div class="info-title">Patient summary</div>
+          <div class="muted" style="margin-bottom: 8px;">
+            <strong>Patient:</strong> {{ patient_name }}<br />
+            <strong>Date:</strong> {{ prediction_timestamp }}<br />
+            <strong>Result:</strong> {{ result }}<br />
+            <strong>Confidence:</strong> {{ "%.2f"|format(confidence) }}%
+          </div>
+          <div class="alert">{{ sections.system_disclaimer }}</div>
+        </div>
+
+        <div class="stack" style="margin-top: 14px;">
+          <div class="info-card">
+            <div class="info-title">A. Next Steps</div>
+            <ul class="list">{% for x in sections.next_steps %}<li>{{ x }}</li>{% endfor %}</ul>
+          </div>
+
+          <div class="info-card">
+            <div class="info-title">B. Medications (General Guidance Only)</div>
+            <ul class="list">{% for x in sections.medications %}<li>{{ x }}</li>{% endfor %}</ul>
+            <div class="muted small" style="margin: 8px 0 0;">{{ sections.prescription_disclaimer }}</div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-title">C. Food Recommendations</div>
+            <div class="muted" style="margin-bottom: 8px;"><strong>Healthy diet:</strong></div>
+            <ul class="list">{% for x in sections.food_healthy %}<li>{{ x }}</li>{% endfor %}</ul>
+            <div class="muted" style="margin: 10px 0 8px;"><strong>Avoid:</strong></div>
+            <ul class="list">{% for x in sections.food_avoid %}<li>{{ x }}</li>{% endfor %}</ul>
+          </div>
+
+          <div class="info-card">
+            <div class="info-title">D. Exercises</div>
+            <div class="muted" style="margin-bottom: 8px;"><strong>Recommended:</strong></div>
+            <ul class="list">{% for x in sections.exercise_do %}<li>{{ x }}</li>{% endfor %}</ul>
+            <div class="muted" style="margin: 10px 0 8px;"><strong>Avoid:</strong></div>
+            <ul class="list">{% for x in sections.exercise_avoid %}<li>{{ x }}</li>{% endfor %}</ul>
+          </div>
+
+          <div class="info-card">
+            <div class="info-title">E. Surgery Info</div>
+            <ul class="list">{% for x in sections.surgery_info %}<li>{{ x }}</li>{% endfor %}</ul>
+          </div>
+
+          <div class="info-card">
+            <div class="info-title">F. Precautions</div>
+            <ul class="list">{% for x in sections.precautions %}<li>{{ x }}</li>{% endfor %}</ul>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px;">
+          <a class="btn primary btn-lg" href="{{ url_for('home') }}">Back to Home</a>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+

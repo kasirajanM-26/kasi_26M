@@ -1,0 +1,23 @@
+result
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Result</title>
+</head>
+<body>
+
+<h2>{{ tumor_status }}</h2>
+<p>Confidence: {{ confidence }}%</p>
+
+<h3>Uploaded Image</h3>
+<img src="{{ image }}" width="300">
+
+{% if overlay %}
+<h3>Segmented Tumor (Overlay)</h3>
+<img src="{{ overlay }}" width="300">
+{% endif %}
+
+</body>
+</html>

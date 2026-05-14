@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brain Tumor Detection & Segmentation</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <!-- Home icon always visible (top-left) -->
+        <a class="home-icon" href="{{ url_for('home') }}" aria-label="Home">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 11.5 12 4l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11.5Z" stroke="rgba(255,255,255,0.92)" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </a>
+
+        <a class="brand-inline" href="{{ url_for('home') }}">
+          <div class="dot"></div>
+          <div>
+            <div class="brand-title-sm">Brain Tumor AI</div>
+            <div class="brand-subtitle-sm">Detection & Segmentation</div>
+          </div>
+        </a>
+        <div class="nav">
+          <a class="nav-link active" href="{{ url_for('home') }}">Home</a>
+          <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a class="nav-link" href="{{ url_for('history') }}">History</a>
+          <a class="nav-link" href="{{ url_for('food') }}">Food Recommendations</a>
+          <a class="nav-link" href="{{ url_for('articles') }}">Articles</a>
+          {% if session.get('role') == 'admin' %}
+            <a class="nav-link" href="{{ url_for('admin') }}">Admin</a>
+          {% endif %}
+          <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container page">
+      <div class="card glass page-card">
+        <div class="center">
+          <h1 class="hero-title">Brain Tumor Detection & Segmentation</h1>
+          <p class="muted hero-subtitle">Upload an MRI image to classify tumor presence. If tumor is detected, segmentation overlay is generated.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="alerts">
+              {% for category, message in messages %}
+                <div class="alert {{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form method="post" action="{{ url_for('predict_route') }}" enctype="multipart/form-data" class="form vertical" id="uploadForm">
+          <label class="label">MRI image</label>
+          <input class="input file" type="file" name="file" accept="image/*" required id="fileInput" />
+          <button class="btn primary btn-lg" type="submit">Analyze MRI</button>
+        </form>
+
+        <div class="section">
+          <div class="section-title">Image preview</div>
+          <div class="preview single">
+            <div class="preview-col">
+              <img
+                class="preview-img"
+                id="prePreview"
+                src="{{ (url_for('static', filename='uploads/' ~ input_image_file)) if input_image_file else '' }}"
+                alt="Uploaded MRI preview"
+                style="{{ '' if input_image_file else 'display:none;' }}"
+              />
+              <div class="empty" id="preEmpty" style="{{ 'display:none;' if input_image_file else '' }}">
+                <div class="empty-title">No image selected</div>
+                <div class="muted">Choose an MRI image to preview it before prediction.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-title">Result</div>
+          {% if result %}
+            <div class="result-vertical">
+              <div class="pill {{ 'danger' if result == 'Tumor Detected' else 'success' }}">
+                {{ result }}
+              </div>
+              <div class="result-line">
+                <div class="result-label">Confidence</div>
+                <div class="result-value">{{ "%.2f"|format(confidence) }}%</div>
+              </div>
+            </div>
+          {% else %}
+            <div class="pill neutral">No prediction yet</div>
+          {% endif %}
+        </div>
+
+        <div class="section">
+          <div class="section-title">Segmentation</div>
+          {% if result == 'Tumor Detected' and segmented_image_file %}
+            <img class="preview-img" src="{{ url_for('static', filename='uploads/' ~ segmented_image_file) }}" alt="Tumor segmentation overlay" />
+          {% else %}
+            <div class="muted">Segmentation overlay will appear here if tumor is detected.</div>
+          {% endif %}
+        </div>
+
+        <div class="section">
+          <div class="section-title">Doctor-style Prescription</div>
+
+          {% if result == 'Tumor Detected' %}
+            <div class="info-card">
+              <div class="info-title">Patient summary</div>
+              <div class="muted" style="margin-bottom: 8px;">
+                <strong>Patient:</strong> {{ session.get('name', 'Patient') }}<br />
+                <strong>Date:</strong> {{ prediction_timestamp or '—' }}
+              </div>
+              <div class="pill danger">Tumor Detected</div>
+              <div class="result-line" style="margin-top: 10px;">
+                <div class="result-label">Confidence</div>
+                <div class="result-value">{{ "%.2f"|format(confidence) }}%</div>
+              </div>
+            </div>
+
+            <div class="stack" style="margin-top: 12px;">
+              <div class="info-card">
+                <div class="info-title">A. Next Steps</div>
+                <ul class="list">
+                  <li>Consult neurologist immediately</li>
+                  <li>MRI/CT scan confirmation</li>
+                  <li>Biopsy if required</li>
+                </ul>
+              </div>
+
+              <div class="info-card">
+                <div class="info-title">B. Medications (General Guidance Only)</div>
+                <ul class="list">
+                  <li>Dexamethasone (reduce swelling)</li>
+                  <li>Levetiracetam (prevent seizures)</li>
+                  <li>Temozolomide (if malignant — may be considered by oncologist)</li>
+                </ul>
+                <div class="muted small" style="margin: 8px 0 0;">
+                  This is not a final prescription. Consult a doctor.
+                </div>
+              </div>
+
+              <div class="info-card">
+                <div class="info-title">C. Food Recommendations</div>
+                <div class="muted" style="margin-bottom: 8px;"><strong>Healthy diet:</strong></div>
+                <ul class="list">
+                  <li>Fruits (apple, berries)</li>
+                  <li>Vegetables (broccoli, spinach)</li>
+                  <li>Whole grains</li>
+                  <li>Protein (eggs, fish)</li>
+                </ul>
+                <div class="muted" style="margin: 10px 0 8px;"><strong>Avoid:</strong></div>
+                <ul class="list">
+                  <li>Junk food</li>
+                  <li>High sugar</li>
+                  <li>Alcohol</li>
+                </ul>
+              </div>
+
+              <div class="info-card">
+                <div class="info-title">D. Exercises</div>
+                <div class="muted" style="margin-bottom: 8px;"><strong>Recommended:</strong></div>
+                <ul class="list">
+                  <li>Light walking</li>
+                  <li>Breathing exercises</li>
+                  <li>Yoga (basic)</li>
+                </ul>
+                <div class="muted" style="margin: 10px 0 8px;"><strong>Avoid:</strong></div>
+                <ul class="list">
+                  <li>Heavy workouts</li>
+                </ul>
+              </div>
+
+              <div class="info-card">
+                <div class="info-title">E. Surgery Info</div>
+                <ul class="list">
+                  <li>Surgery required if tumor size increases</li>
+                  <li>Radiotherapy / chemotherapy may be needed</li>
+                </ul>
+              </div>
+
+              <div class="info-card">
+                <div class="info-title">F. Precautions</div>
+                <ul class="list">
+                  <li>Regular checkups</li>
+                  <li>Avoid stress</li>
+                  <li>Proper sleep</li>
+                  <li>Follow medication strictly</li>
+                </ul>
+              </div>
+
+              <div class="row-between">
+                <form method="get" action="{{ url_for('download_prescription') }}" style="margin: 0;">
+                  <button class="download-btn" type="submit">Download Prescription</button>
+                </form>
+                <div class="muted small" style="margin: 0;">
+                  This is an AI-assisted summary for guidance only.
+                </div>
+              </div>
+            </div>
+          {% elif result == 'No Tumor' %}
+            <div class="info-card">
+              <div class="info-title">No tumor detected</div>
+              <ul class="list">
+                <li>Maintain a healthy lifestyle</li>
+                <li>Regular checkups</li>
+                <li>Seek medical advice if symptoms persist</li>
+              </ul>
+            </div>
+          {% else %}
+            <div class="muted">Prescription will appear after a prediction.</div>
+          {% endif %}
+
+          <div class="alert" style="margin-top: 12px;">
+            {{ "This system provides AI-based suggestions and is not a substitute for professional medical advice." }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spinner-overlay" id="spinner" style="display:none;">
+      <div class="spinner-card glass">
+        <div class="spinner"></div>
+        <div class="spinner-text">Analyzing MRI…</div>
+        <div class="muted small">This may take a few seconds.</div>
+      </div>
+    </div>
+
+    <script>
+      const fileInput = document.getElementById("fileInput");
+      const prePreview = document.getElementById("prePreview");
+      const preEmpty = document.getElementById("preEmpty");
+      const form = document.getElementById("uploadForm");
+      const spinner = document.getElementById("spinner");
+
+      if (fileInput) {
+        fileInput.addEventListener("change", () => {
+          const file = fileInput.files && fileInput.files[0];
+          if (!file) return;
+          const url = URL.createObjectURL(file);
+          prePreview.src = url;
+          prePreview.style.display = "";
+          preEmpty.style.display = "none";
+        });
+      }
+
+      if (form) {
+        form.addEventListener("submit", () => {
+          spinner.style.display = "";
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin | Brain Tumor Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <a class="home-icon" href="{{ url_for('home') }}" aria-label="Home">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 11.5 12 4l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11.5Z" stroke="rgba(255,255,255,0.92)" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </a>
+
+        <a class="brand-inline" href="{{ url_for('home') }}">
+          <div class="dot"></div>
+          <div>
+            <div class="brand-title-sm">Brain Tumor AI</div>
+            <div class="brand-subtitle-sm">Detection & Segmentation</div>
+          </div>
+        </a>
+
+        <div class="nav">
+          <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+          <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a class="nav-link" href="{{ url_for('history') }}">History</a>
+          <a class="nav-link" href="{{ url_for('food') }}">Food Recommendations</a>
+          <a class="nav-link" href="{{ url_for('articles') }}">Articles</a>
+          <a class="nav-link active" href="{{ url_for('admin') }}">Admin</a>
+          <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container page">
+      <div class="card glass page-card center">
+        <h1 class="hero-title">Admin Dashboard</h1>
+        <p class="muted hero-subtitle">Global monitoring of users and predictions.</p>
+
+        <div class="stats stats-compact" style="justify-content: center;">
+          <div class="stat">
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value">{{ total_users }}</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Total Predictions</div>
+            <div class="stat-value">{{ total_predictions }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stack" style="margin-top: 16px;">
+        <div class="card glass page-card">
+          <div class="section-title">Pie Chart (Tumor vs No Tumor)</div>
+          <div class="chart-wrap">
+            <canvas id="globalPie"></canvas>
+          </div>
+        </div>
+
+        <div class="card glass page-card">
+          <div class="section-title">Bar Chart (Scans per Day)</div>
+          <div class="chart-wrap">
+            <canvas id="globalBar"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="stack" style="margin-top: 16px;">
+        <div class="card glass page-card">
+          <div class="row-between">
+            <div>
+              <div class="section-title" style="margin-bottom: 6px;">All Users</div>
+              <div class="muted">Edit name and disease for regular users. Admin account is protected.</div>
+            </div>
+          </div>
+
+          <div class="table-wrap" style="margin-top: 12px;">
+            {% for u in users %}
+              {% if u.role == 'user' %}
+                <form id="edit-user-{{ u.id }}" method="post" action="{{ url_for('admin_edit_user', user_id=u.id) }}"></form>
+              {% endif %}
+            {% endfor %}
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Disease</th>
+                  <th>Role</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for u in users %}
+                  <tr>
+                    <td class="mono">{{ u.id }}</td>
+                    {% if u.role == 'user' %}
+                      <td>
+                        <input class="input" type="text" name="name" form="edit-user-{{ u.id }}" value="{{ u.name }}" required />
+                      </td>
+                      <td>{{ u.email }}</td>
+                      <td>
+                        <select class="input" name="disease" form="edit-user-{{ u.id }}">
+                          <option value="diabetes" {{ 'selected' if u.disease == 'diabetes' else '' }}>Diabetes</option>
+                          <option value="bp" {{ 'selected' if u.disease == 'bp' else '' }}>BP</option>
+                          <option value="thyroid" {{ 'selected' if u.disease == 'thyroid' else '' }}>Thyroid</option>
+                          <option value="sinus" {{ 'selected' if u.disease == 'sinus' else '' }}>Sinus</option>
+                          <option value="none" {{ 'selected' if u.disease == 'none' else '' }}>None</option>
+                        </select>
+                      </td>
+                      <td><span class="pill success">user</span></td>
+                      <td>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                          <button class="btn primary small" type="submit" form="edit-user-{{ u.id }}">Save</button>
+                          <form method="post" action="{{ url_for('admin_delete_user', user_id=u.id) }}" onsubmit="return confirm('Delete this user and their history?');">
+                            <button class="btn danger small" type="submit">Delete</button>
+                          </form>
+                        </div>
+                      </td>
+                    {% else %}
+                      <td>{{ u.name }}</td>
+                      <td>{{ u.email }}</td>
+                      <td>{{ u.disease }}</td>
+                      <td><span class="pill neutral">admin</span></td>
+                      <td><span class="muted small">Protected</span></td>
+                    {% endif %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card glass page-card">
+          <div class="row-between">
+            <div>
+              <div class="section-title" style="margin-bottom: 6px;">All Prediction History</div>
+              <div class="muted">Latest 400 records across all users.</div>
+            </div>
+          </div>
+
+          <div class="table-wrap" style="margin-top: 12px;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>User</th>
+                  <th>Input</th>
+                  <th>Segmentation</th>
+                  <th>Result</th>
+                  <th>Confidence</th>
+                  <th>Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in history_rows %}
+                  <tr>
+                    <td class="mono">{{ r.id }}</td>
+                    <td>{{ r.email }}</td>
+                    <td>
+                      <a class="link" href="{{ url_for('static', filename='uploads/' ~ r.image) }}" target="_blank" rel="noreferrer">
+                        view
+                      </a>
+                    </td>
+                    <td>
+                      <a class="link" href="{{ url_for('static', filename='uploads/' ~ r.mask) }}" target="_blank" rel="noreferrer">
+                        view
+                      </a>
+                    </td>
+                    <td>
+                      <span class="pill {{ 'danger' if r.result == 'Tumor Detected' else 'success' }}">{{ r.result }}</span>
+                    </td>
+                    <td class="mono">{{ "%.2f"|format(r.confidence) }}%</td>
+                    <td class="mono">{{ r.timestamp }}</td>
+                    <td>
+                      <form method="post" action="{{ url_for('admin_delete_history', history_id=r.id) }}" onsubmit="return confirm('Delete this record?');">
+                        <button class="btn danger small" type="submit">Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="application/json" id="adminData">
+      {{
+        {
+          "tumorCount": tumor_count,
+          "noTumorCount": no_tumor_count,
+          "dayLabels": day_labels,
+          "dayCounts": day_counts
+        } | tojson
+      }}
+    </script>
+
+    <script>
+      const adminData = JSON.parse(document.getElementById("adminData").textContent);
+
+      new Chart(document.getElementById("globalPie"), {
+        type: "pie",
+        data: {
+          labels: ["Tumor Detected", "No Tumor"],
+          datasets: [
+            {
+              data: [adminData.tumorCount, adminData.noTumorCount],
+              backgroundColor: ["rgba(255, 99, 132, 0.85)", "rgba(46, 204, 113, 0.85)"],
+              borderColor: "rgba(255,255,255,0.22)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          plugins: { legend: { labels: { color: "rgba(255,255,255,0.95)" } } },
+        },
+      });
+
+      new Chart(document.getElementById("globalBar"), {
+        type: "bar",
+        data: {
+          labels: adminData.dayLabels,
+          datasets: [
+            {
+              label: "Scans",
+              data: adminData.dayCounts,
+              backgroundColor: "rgba(99, 102, 241, 0.75)",
+              borderColor: "rgba(255,255,255,0.25)",
+              borderWidth: 1,
+            },
+          ],
+        },
+        options: {
+          scales: {
+            x: { ticks: { color: "rgba(255,255,255,0.85)" }, grid: { color: "rgba(255,255,255,0.08)" } },
+            y: { ticks: { color: "rgba(255,255,255,0.85)" }, grid: { color: "rgba(255,255,255,0.08)" }, beginAtZero: true },
+          },
+          plugins: { legend: { labels: { color: "rgba(255,255,255,0.95)" } } },
+        },
+      });
+    </script>
+  </body>
+</html>
+

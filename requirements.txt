@@ -1,0 +1,9 @@
+Flask>=3.0.0
+Werkzeug>=3.0.0
+numpy>=1.23.0
+Pillow>=10.0.0
+opencv-python>=4.8.0
+tensorflow>=2.12.0
+keras>=3.0.0
+h5py>=3.10.0
+reportlab>=4.0.0

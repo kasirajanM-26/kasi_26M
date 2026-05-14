@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Articles | Brain Tumor Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body>
+    <div class="topbar">
+      <div class="topbar-inner">
+        <a class="home-icon" href="{{ url_for('home') }}" aria-label="Home">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 11.5 12 4l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V11.5Z" stroke="rgba(255,255,255,0.92)" stroke-width="2" stroke-linejoin="round"/>
+          </svg>
+        </a>
+
+        <a class="brand-inline" href="{{ url_for('home') }}">
+          <div class="dot"></div>
+          <div>
+            <div class="brand-title-sm">Brain Tumor AI</div>
+            <div class="brand-subtitle-sm">Detection & Segmentation</div>
+          </div>
+        </a>
+
+        <div class="nav">
+          <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+          <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+          <a class="nav-link" href="{{ url_for('history') }}">History</a>
+          <a class="nav-link" href="{{ url_for('food') }}">Food Recommendations</a>
+          <a class="nav-link active" href="{{ url_for('articles') }}">Articles</a>
+          {% if session.get('role') == 'admin' %}
+            <a class="nav-link" href="{{ url_for('admin') }}">Admin</a>
+          {% endif %}
+          <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="container page">
+      <div class="card glass page-card">
+        <h1 class="hero-title">Brain Tumor Information</h1>
+        <p class="muted hero-subtitle">
+          Educational content only. This app is not a diagnostic tool and should not replace medical care.
+        </p>
+
+        <div class="stack" style="margin-top: 16px;">
+          <div class="info-card">
+            <div class="info-title">What is a Brain Tumor?</div>
+            <div class="muted">
+              A brain tumor is an abnormal growth of cells in or near the brain. It can be benign (non-cancerous) or malignant (cancerous),
+              and symptoms depend on size and location.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-title">Common Symptoms</div>
+            <div class="muted">
+              Possible symptoms include persistent headaches, seizures, changes in vision or hearing, weakness or numbness, confusion,
+              and difficulty with balance.
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-title">Prevention Tips</div>
+            <div class="muted">
+              While not all brain tumors can be prevented, general risk reduction includes maintaining a healthy lifestyle,
+              avoiding smoking, limiting alcohol, managing chronic conditions, and seeking early medical advice for concerning symptoms.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+

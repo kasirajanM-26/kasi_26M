@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register | Brain Tumor Detection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  </head>
+  <body class="auth-body">
+    <div class="auth-shell">
+      <div class="card glass">
+        <div class="card-header">
+          <div class="brand">
+            <div class="brand-title">Brain Tumor AI</div>
+            <div class="brand-subtitle">Detection & Segmentation</div>
+          </div>
+        </div>
+
+        <h2 class="title">Create account</h2>
+        <p class="muted">Register to upload MRIs and view your history.</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="alerts">
+              {% for category, message in messages %}
+                <div class="alert {{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <form method="post" class="form">
+          <label class="label">Full name</label>
+          <input class="input" type="text" name="name" placeholder="Enter your name" required autocomplete="name" />
+
+          <label class="label">Email</label>
+          <input class="input" type="email" name="email" placeholder="Enter your email" required autocomplete="email" autocapitalize="none" spellcheck="false" />
+
+          <label class="label">Password</label>
+          <input class="input" type="password" name="password" placeholder="Create a strong password" required autocomplete="new-password" />
+
+          <label class="label">Disease</label>
+          <select class="input" name="disease" required>
+            <option value="diabetes">Diabetes</option>
+            <option value="bp">BP</option>
+            <option value="thyroid">Thyroid</option>
+            <option value="sinus">Sinus</option>
+            <option value="none" selected>None</option>
+          </select>
+
+          <button class="btn primary btn-lg" type="submit">Register</button>
+        </form>
+
+        <div class="card-footer">
+          <div class="row-between">
+            <a class="link" href="{{ url_for('login') }}">Back to login</a>
+            <span class="muted small">Role: <strong>User</strong></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
