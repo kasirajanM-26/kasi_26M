@@ -97,10 +97,8 @@ bartset/
 
 The admin account is **created internally** and is **not shown** in the UI. For initial access, use the credentials documented **only here**:
 
-| Field | Value |
-|-------|--------|
-| **Email** | `admin@neurascan.com` |
-| **Password** | `admin123` |
+
+
 
 Change the password in production (e.g., update the DB or extend the app with a password-change flow). Only **one** admin email is enforced in code.
 
